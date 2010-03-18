@@ -1,14 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
-int process(FILE *fin, FILE *fout, size_t offset, size_t stride, size_t width)
+/*
+ * This is like fseek(fin, n, SEEK_CUR) for a pipe (which is not fseekable).
+ * Return the number of successfully read (and discarded) bytes.
+ */
+int advance(FILE *fin, int n)
+{
+  int i;
+  for (i=0; i<n && (fgetc(fin) != EOF); i++);
+  return i;
+}
+
+int process(FILE *fin, FILE *fout, int offset, int stride, int width)
 {
   int errcode = 0;
   char *buffer = malloc(width);
-  size_t fread_result;
+  int fread_result;
   int gap = stride - width;
-  /* seek to the offset */
-  if (fseek(fin, offset, SEEK_SET) < 0)
+  /* seek past the first few bytes */
+  if (advance(fin, offset) < offset)
   {
     goto end;
   }
@@ -16,7 +28,7 @@ int process(FILE *fin, FILE *fout, size_t offset, size_t stride, size_t width)
   while (1)
   {
     /* read from the channel */
-    fread_result = fread(buffer, 1, width, fin);
+    fread_result = (int) fread(buffer, 1, width, fin);
     if (!fread_result)
     {
       goto end;
@@ -28,13 +40,10 @@ int process(FILE *fin, FILE *fout, size_t offset, size_t stride, size_t width)
     }
     /* write to the output stream */
     fwrite(buffer, 1, width, fout);
-     /* if the demux is nondegenerate then seek according to the stride */
-    if (gap)
+    /* seek according to the stride */
+    if (advance(fin, gap) < gap)
     {
-      if (fseek(fin, gap, SEEK_CUR) < 0)
-      {
-        goto end;
-      }
+      goto end;
     }
   }
 end:
