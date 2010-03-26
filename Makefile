@@ -1,4 +1,4 @@
-FLAGS = -W -Wall -pipe -march=native
+FLAGS = -Wall -Wextra -std=c99 -pedantic -pipe -march=native
 
 .PHONY: all
 all : downsample-box demux elementwise-sum
@@ -16,7 +16,7 @@ demux.o : demux.c
 elementwise-sum : elementwise-sum.o
 	gcc elementwise-sum.o -o elementwise-sum
 elementwise-sum.o : elementwise-sum.c
-	gcc -c elementwise-sum.c
+	gcc $(FLAGS) -c elementwise-sum.c
 
 clean :
 	rm *.o
