@@ -4,8 +4,6 @@
 #include <getopt.h>
 #include <string.h>
 
-#include "write-test-pattern.H"
-
 int main(int argc, char *argv[])
 {
   int errcode = EXIT_SUCCESS;
@@ -15,7 +13,7 @@ int main(int argc, char *argv[])
   int width = 4;
   int nreps = 1;
   int verbose_flag = 0;
-  static struct option long_options[] =
+  struct option long_options[] =
   {
     {"verbose", no_argument, &verbose_flag, 1},
     {"format", required_argument, 0, 'f'},
@@ -75,38 +73,32 @@ int main(int argc, char *argv[])
   }
   /* allocate memory for the pattern */
   if (verbose_flag)
-    fprintf(stderr, "allocate pattern...\n");
+    fprintf(stderr, "allocate the pattern...\n");
   int npattern = argc - optind;
-  void *pattern = malloc(npattern * width);
+  int pattern_width = npattern * width;
+  void *pattern = malloc(pattern_width);
   int i;
+  /* create the pattern */
+  if (verbose_flag)
+    fprintf(stderr, "create the the pattern...\n");
+  for (i=0; i<npattern; i++)
+  {
+    const char *s = argv[optind + i];
+    if (typechar == 'd' && width == 4) {
+      ((int32_t *) pattern)[i] = (int32_t) atol(s);
+    } else if (typechar == 'd' && width == 8) {
+      ((int64_t *) pattern)[i] = (int64_t) atol(s);
+    } else if (typechar == 'f' && width == 4) {
+      ((float *) pattern)[i] = (float) atof(s);
+    } else if (typechar == 'f' && width == 8) {
+      ((double *) pattern)[i] = (double) atof(s);
+    }
+  }
   /* write the pattern */
   if (verbose_flag)
-  {
-    fprintf(stderr, "write the pattern using ");
-    fprintf(stderr, "nreps=%d npattern=%d...\n", nreps, npattern);
-  }
-  if (typechar == 'd' && width == 4)
-  {
-    for (i=0; i<npattern; i++)
-      ((int32_t *) pattern)[i] = (int32_t) atol(argv[optind + i]);
-    if (process<int32_t>(nreps, npattern, (int32_t *) pattern, stdout) < 0)
-      errcode = EXIT_FAILURE;
-  } else if (typechar == 'd' && width == 8) {
-    for (i=0; i<npattern; i++)
-      ((int64_t *) pattern)[i] = (int64_t) atol(argv[optind + i]);
-    if (process<int64_t>(nreps, npattern, (int64_t *) pattern, stdout) < 0)
-      errcode = EXIT_FAILURE;
-  } else if (typechar == 'f' && width == 4) {
-    for (i=0; i<npattern; i++)
-      ((float *) pattern)[i] = (float) atof(argv[optind + i]);
-    if (process<float>(nreps, npattern, (float *) pattern, stdout) < 0)
-      errcode = EXIT_FAILURE;
-  } else if (typechar == 'f' && width == 8) {
-    for (i=0; i<npattern; i++)
-      ((double *) pattern)[i] = (double) atof(argv[optind + i]);
-    if (process<double>(nreps, npattern, (double *) pattern, stdout) < 0)
-      errcode = EXIT_FAILURE;
-  }
+    fprintf(stderr, "write the pattern %d times...\n", nreps);
+  for (i=0; i<nreps; i++)
+    fwrite(pattern, pattern_width, 1, stdout);
   /* clean up */
   if (verbose_flag)
     fprintf(stderr, "cleaup...\n");
