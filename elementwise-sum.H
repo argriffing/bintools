@@ -1,6 +1,8 @@
+#ifndef ELEMENTWISE_SUM
+#define ELEMENTWISE_SUM
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 
 template <typename T>
 int process(int ninputs, FILE **infiles, FILE *fout)
@@ -24,3 +26,5 @@ int process(int ninputs, FILE **infiles, FILE *fout)
   }
   return 0;
 }
+
+#endif
