@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
-#include <cstdint>
 #include <cstring>
+#include <stdint.h>
 #include <getopt.h>
 #include <string>
 

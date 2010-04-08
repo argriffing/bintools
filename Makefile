@@ -1,5 +1,10 @@
 CFLAGS = -Wall -Wextra -pedantic -pipe -std=c99
-CPPFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x
+
+# -std=c++0x is not a valid flag in g++ 3.4.6
+#CPPFLAGS = -Wall -Wextra -pedantic -pipe -std=c++0x
+
+CPPFLAGS = -Wall -Wextra -pedantic -pipe
+
 
 .PHONY: all
 all : downsample-box demux elementwise-sum write-test-pattern sum-axis-0
